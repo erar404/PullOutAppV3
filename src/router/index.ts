@@ -4,19 +4,20 @@ import { RouteRecordRaw } from 'vue-router';
 const routes: Array<RouteRecordRaw> = [
   {
     path: '',
-    redirect: '/folder/Scans'
+    redirect: '/folder/Scans',
   },
   {
     path: '/folder/:id',
-    component: () => import ('../views/FolderPage.vue')
+    component: () => import ('../views/FolderPage.vue'),
   },
   {
     path: '/Account',
-    component: () => import ('../views/AccountPage.vue')
+    component: () => import ('../views/AccountPage.vue'),
   },
   {
     path: '/login',
-    component: () => import ('../views/LoginPage.vue')
+    component: () => import ('../views/LoginPage.vue'),
+    meta: { hideMenu: true }
   }
 
 ]
