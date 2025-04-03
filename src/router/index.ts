@@ -4,7 +4,7 @@ import { RouteRecordRaw } from 'vue-router';
 const routes: Array<RouteRecordRaw> = [
   {
     path: '',
-    redirect: '/folder/Scans',
+    redirect: '/scans',
   },
   {
     path: '/folder/:id',
@@ -18,8 +18,13 @@ const routes: Array<RouteRecordRaw> = [
     path: '/login',
     component: () => import ('../views/LoginPage.vue'),
     meta: { hideMenu: true }
-  }
-
+  },
+  {
+    path: '/scans',
+    component: () => import ('../views/ScansPage.vue'),
+    meta: { hideMenu: true }
+  },
+  
 ]
 
 const router = createRouter({

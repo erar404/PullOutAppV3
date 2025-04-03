@@ -22,7 +22,7 @@
         <ion-input
           label="Password"
           label-placement="floating" 
-          placeholder="Enter Username"
+          placeholder="Enter Password"
           v-model="password"
           :type="passwordVisible ? 'text' : 'password'"
           required
@@ -107,45 +107,7 @@ export default defineComponent({
 
     // Dark mode
     const paletteToggle = ref(false);
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)'); // Use matchMedia to check the user preference
-
-    // Start Loading of data from API - Transfer to storage
-    const loadUserData = async () => {
-      try {
-        const response = await axios.get(rgmcAPIurl + '/systemuser');
-       if (response.data.length > 0) {
-        await storage.set('SystemUserList', response.data);
-       }
-      } catch (Exception) {
-        presentAlert('Login', 'Error while loading user data', 'Error Details (Please send a screenshot): \n'+ Exception)
-      }
-    } 
-
-    const loadCompanyData = async () => {
-      try {
-        const response = await axios.get(rgmcAPIurl + '/company');
-        if (response.data.length > 0) {
-          await storage.set('CompanyList', response.data);
-        } else {
-          presentAlert('Login', 'No company data Loaded', '(Please send a screenshot) Details : No Company Data were loaded')
-        }
-      } catch (Exception) {
-        presentAlert('Login', 'Error while loading company data', 'Error Details (Please send a screenshot): \n'+ Exception)
-      }
-    }
-
-    const loadCustomerData = async () => {
-      try {
-        const response = await axios.get(rgmcAPIurl + '/customer');
-        if (response.data.length > 0) {
-          await storage.set('CustomerList', response.data);
-        } else {
-          presentAlert('Login', 'No customer data Loaded', '(Please send a screenshot) Details : No customer Data were loaded')
-        }
-      } catch (Exception) {
-        presentAlert('Login', 'Error while loading customer data', 'Error Details (Please send a screenshot): \n'+ Exception)
-      }
-    }
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)'); // Use matchMedia to check the user preference\
 
     const showLoading = async () => {
       const loading = await loadingController.create({
@@ -154,6 +116,51 @@ export default defineComponent({
 
         loading.present()
     }
+
+    // Start Loading of data from API - Transfer to storage
+    const loadUserData = async (loading: any) => {
+      try {
+        const response = await axios.get(rgmcAPIurl + '/systemuser');
+       if (response.data.length > 0) {
+        await storage.set('SystemUserList', response.data);
+        systemUsers.value = await response.data;
+       }
+      } catch (Exception) {
+        loading.dismiss()
+        presentAlert('Login', 'Error while loading user data', 'Error Details (Please send a screenshot): \n'+ Exception)
+      }
+
+    } 
+
+    const loadCompanyData = async (loading: any) => {
+      try {
+        const response = await axios.get(rgmcAPIurl + '/company');
+        if (response.data.length > 0) {
+          await storage.set('CompanyList', response.data);
+        } else {
+          loading.dismiss()
+          presentAlert('Login', 'No company data Loaded', '(Please send a screenshot) Details : No Company Data were loaded')
+        }
+      } catch (Exception) {
+        presentAlert('Login', 'Error while loading company data', 'Error Details (Please send a screenshot): \n'+ Exception)
+      }
+    }
+
+    const loadCustomerData = async (loading: any) => {
+      try {
+        const response = await axios.get(rgmcAPIurl + '/customer');
+        if (response.data.length > 0) {
+          await storage.set('CustomerList', response.data);
+        } else {
+          loading.dismiss();
+          presentAlert('Login', 'No customer data Loaded', '(Please send a screenshot) Details : No customer Data were loaded')
+        }
+      } catch (Exception) {
+        presentAlert('Login', 'Error while loading customer data', 'Error Details (Please send a screenshot): \n'+ Exception)
+      }
+    }
+
+    
 
     const presentAlert = async (header: string, subHeader: string, message: string ) => {
       const alert = await alertController.create({
@@ -176,8 +183,8 @@ export default defineComponent({
         message: 'Loading Data. Internet Connection Needed...',});
       
       loading.present()
-      loadUserData();
-      loadCustomerData();
+      loadUserData(loading);
+      loadCustomerData(loading);
       // loadCompany()
       loading.dismiss();
     });
@@ -215,9 +222,14 @@ export default defineComponent({
     const handleLogin = (): void => {
       if (username.value && password.value) {
         // For now, you can add a simple alert or redirect logic
-        alert(`Logged in with Username: ${username.value}`);
+        if (systemUsers.value.find(val => val.secCode.toUpperCase() === username.value.toUpperCase() && val.passwordDecrypted === password.value)) {
+          presentAlert('login', 'Success!', 'Logged in with Username: ${username.value}');
+          router.push('/Scans')
+        } else {
+          presentAlert('login', 'Credentials', `Incorrect Username/Password`);
+        }
       } else {
-        alert('Please fill in both fields');
+        presentAlert('login', 'Credentials', 'Please fill in both fields');
       }
     };
 
@@ -231,15 +243,15 @@ export default defineComponent({
       username,
       password,
       passwordVisible,
-      togglePasswordVisibility,
-      handleLogin,
-      handleSignup,
       eyeOutline, 
       eyeOffOutline,
       eye, 
       eyeOff,
       prefersDark,
       paletteToggle,
+      togglePasswordVisibility,
+      handleLogin,
+      handleSignup,
       toggleChange,
       initializeDarkPalette,
       showLoading

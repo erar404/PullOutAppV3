@@ -67,7 +67,7 @@ const selectedIndex = ref(0);
 const appPages = [
   {
     title: 'Scans',
-    url: '/folder/Scans',
+    url: '/Scans',
     iosIcon: barcodeOutline,
     mdIcon: barcodeSharp,
   },
